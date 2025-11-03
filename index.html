@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minos: Judgement</title>
+    <link rel="stylesheet" src="css/style.css">
+</head>
+<body>
+    
+<header class="site-header">
+    <h1 class="title">Minos: Judgement</h1>
+    <button id="open-reference" class="ghost">Reference (Circles)</button>
+</header>
+
+<main id="game" class="game">
+    <section class="hud" aria-label="Game Status">
+        <div><strong>Time </strong> <span id="hud-time">3:00</span></div>
+        <div><strong>Score </strong><span id="hud-score">0</span></div>
+        <div><strong>Streak </strong><span id="hud-streak">0</span></div>
+
+        <div class="divider"></div>
+
+        <div>Virtue <span id="stat-virtue">0</span></div>
+        <div>Wisdom <span id="stat-wisdom">0</span></div>
+        <div>Courage <span id="stat-courage">0</span></div>
+        <div>Compassion <span id="stat-compassion"></span></div>
+        <div>Humility <span id="stat-humility">0</span></div>
+
+        <div id="effects-log" class="fxlog" aria-live="polite"></div>
+    </section>
+
+    <!--desk layout-->
+    <section class="desk">
+        <aside class="side">
+            <button id="btn-consult" class="btn">Appeal to Virgil (1)</button>
+            <button id="btn-pity" class="btn" style="margin-top: 8px;">Mercy Stay (1)</button>
+            
+            <div id="reveal" class="note" aria-live="polite"></div>
+        </aside>
+
+        <section class="center">
+            <article class="card" aria-live="polite">
+                <h2 id="soul-name" class="soul-name">-</h2>
+                <ul id="soul-clues" class="clues"></ul>
+            </article>
+
+            <nav id="bins" class="bins" aria-label="Judgement choices">
+            </nav>
+
+            <p id="end-screen" class="end-hidden"></p>
+        </section>
+    
+        <aside class="side side--art">
+            <div class="art" role="img" aria-label="Minos in judgement"></div>
+        </aside>
+    </section>
+</main>
+
+<dialog id="reference">
+    <form method="dialog" class="ref">
+        <header>
+            <h2>Circles of Judgement - Guide</h2>
+            <button value="close" aria-label="Close">✕</button>
+        </header>
+
+        <div class="ref-grid" id="ref-grid">
+            <section id="ref-indifferent">
+                <h3>Ante-Inferno - Indifferent</h3>
+                <p>Refused to choose and drifted with advantage.</p>
+                <ui><li>Fence-sitting, opportunism, avoidance</li></ui>
+            </section>
+
+            <section id="ref-1"><h3>I. Limbo</h3>
+                <p>Natural virtue without faith or revelation.</p>
+                <ul><li>Just, wise by reason; unreached by grace.</li></ul>
+            </section>
+
+            <section id="ref-2"><h3>II. Lust</h3>
+                <p>Desire placed above vows and duty.</p>
+                <ul><li>Serial infidelity, romantic rationalization.</li></ul>
+            </section>
+
+            <section id="ref-3"><h3>III. Gluttony</h3>
+                <p>Bodily excess, apathy toward work and neighbor.</p>
+                <ul><li>Habitual overindulgence, slothful routine.</li></ul>
+            </section>
+
+            <section id="ref-4"><h3>IV. Greed</h3>
+                <p>Wealth as an end: hoarding or squandering without measure.</p>
+                <ul><li>Usury, hoarding in scarcity, performative charity.</li></ul>
+            </section>
+
+            <section id="ref-5"><h3>V. Wrath/Sullen</h3>
+                <p>Violent anger or habitual resentment/passivity.</p>
+                <ul><li>Vindictiveness, corrosive gloom.</li></ul>
+            </section>
+
+            <section id="ref-6"><h3>VI. Heresy</h3>
+                <p>Willful denial of core truths for reputation or sect.</p>
+                <ul><li>Dogmatic materialism, contempt for the soul.</li></ul>
+            </section>
+
+            <section id="ref-7"><h3>VII. Violence</h3>
+                <p>Against others, self, or God/nature.</p>
+                <ul><li>Cruelty, exploitation, self-destruction.</li></ul>
+            </section>
+
+            <section id="ref-8"><h3>VIII. Fraud</h3>
+                <p>Deception used as an instrument for gain.</p>
+                <ul><li>Bribery, false counsel, forgery.</li></ul>
+            </section>
+
+            <section id="ref-9"><h3>IX. Treachery</h3>
+                <p>Betrayal of a special trust (kin, homeland, guest, benefactor).</p>
+                <ul><li>Inside jobs, oath-breaking, selling out allies.</li></ul>
+            </section>
+        </div>
+    </form>
+</dialog>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/game.js"></script>
+
+<script>
+    const ref = document.getElementById('reference')
+    document.getElementById('open-reference').addEventListener('click', () => ref.showModal());
+    ref?.addEventListener('click', (e) => {
+        if (e.target === ref) ref.close();
+    });
+</script>
+
+
+</body>
+</html>
