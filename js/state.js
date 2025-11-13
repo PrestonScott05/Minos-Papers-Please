@@ -1,101 +1,106 @@
 (function () {
-    const DEFAULT_TIME_MS = 3 * 60 * 1000 // 3 minutes
+  const DEFAULT_TIME_MS = 3 * 60 * 1000; // 3 minutes
+  const Stats = { virtue: 0, wisdom: 0, courage: 0, compassion: 0, humility: 0 };
 
-    const Stats = {virtue: 0, wisdom: 0, courage: 0, compassion: 0, humility: 0 };
+  const State = {
+    timerMs: DEFAULT_TIME_MS,
+    score: 0,
+    streak: 0,
+    deck: [],
+    current: null,
+    stats: { ...Stats },
+    power: { consults: 1, pities: 1 },
+    penaltyMs: 5000,
+    opts: { sound: true, tips: true, difficulty: 'normal' }
+  };
 
-    const State = {
-        timerMs: DEFAULT_TIME_MS,
-        score: 0,
-        streak: 0, 
-        deck: [], 
-        current: null, 
-        stats: { ...Stats },
-        power: { consults: 1, pities: 1},
-        penaltyMs: 5000
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
     }
+    return arr;
+  }
 
-    function shuffle(souls_deck) {
-        for (let i=souls_deck.length - 1; i> 0; i--){
-            const j = Math.floor(Math.random() * (i + 1));
-            [souls_deck[i], souls_deck[j]] = [souls_deck[j], souls_deck[i]];
-        }
-
-        return souls_deck;
+  function buildDeck(deckSize) {
+    const result = [];
+    while (result.length < deckSize) {
+      result.push(...shuffle(SOULS.slice()));
     }
+    return result.slice(0, deckSize);
+  }
 
-    function initiateGame() {
-         State.timerMs = DEFAULT_TIME_MS;
-         State.score = 0;
-         State.streak = 0;
-         State.stats = {...Stats};
-         State.power = { consults:1, pities:1 };
-         State.deck = shuffle(SOULS.slice()); //copy and shuffle
-         State.current = State.deck.shift() || null;
+  function initiateGame(deckSize = 25) {
+    State.timerMs = DEFAULT_TIME_MS;
+    State.score = 0;
+    State.streak = 0;
+    State.stats = { ...Stats };
+    State.power = { consults: 1, pities: 1 };
+
+    State.deck = buildDeck(deckSize);
+    State.current = State.deck.shift() || null;
+  }
+
+  function drawSoul() {
+    State.current = State.deck.shift() || null;
+  }
+
+  function assign(circleId) {
+    if (!State.current) return;
+    const correct = (State.current.circle === circleId);
+
+    if (correct) {
+      State.score += 100 + 10 * State.streak;
+      State.streak += 1;
+      State.stats.wisdom += 3;
+      State.stats.virtue += 3;
+
+      if (State.streak % 5 === 0) {
+        State.stats.courage += 3;
+      }
+    } else {
+      State.streak = 0;
+      State.stats.wisdom -= 3;
+      State.timerMs = Math.max(0, State.timerMs - State.penaltyMs);
     }
+    drawSoul();
+  }
 
-    function drawSoul() {
-        State.current = State.deck.shift() || null;
-    }
+  function useConsult() {
+    if (State.power.consults <= 0 || !State.current) return null;
 
-    function assign(circleId) {
-        if (!State.current) return;
-        const correct = (State.current.circle === circleId);
+    State.power.consults -= 1;
+    State.timerMs = Math.max(0, State.timerMs - 10_000);
+    State.stats.humility += 1;
+    State.stats.wisdom += 1;
 
-        if (correct) {
-            State.score += 100 + 10*State.streak
-            State.streak += 1;
-            State.stats.wisdom += 1;
-            State.stats.virtue += 1;
-            
-            if (State.streak % 5 === 0) {
-                State.stats.courage += 1;
-            }
-        }
-        else {
-            State.streak = 0;
-            State.stats.wisdom -= 1;
-            State.timerMs = Math.max(0, State.timerMs - State.penaltyMs)
-        }
-        drawSoul();
-    }
+    return State.current.circle;
+  }
 
-    function useConsult() {
-        if (State.power.consults <= 0 || !State.current) return null;
-        
-        State.power.consults -= 1;
-        State.timerMs = Math.max(0, State.timerMs - 10_000);
-        State.stats.humility += 1;
-        State.Stats.wisdom += 1;
+  function usePity() {
+    if (State.power.pities <= 0 || !State.current) return null;
 
-        return State.current.circle;
-    }
+    State.power.pities -= 1;
+    State.stats.compassion += 1;
+    State.stats.wisdom -= 1;
+    drawSoul();
+  }
 
-    function usePity() {
-        if (State.power.pities <= 0 || !State.current) return null;
+  function isOver() {
+    return State.timerMs <= 0 || !State.current;
+  }
 
-        State.power.pities -= 1;
-        State.stats.compassion += 1;
-        State.stats.wisdom -= 1;
-        drawSoul();
-    }
+  function pickEnding(arg) {
+    const stat = (arg && arg.stats) ? arg.stats : State.stats;
 
-    function isOver() {
-        return state.timerMs <= 0 || !state.current;
-    }
+    const { virtue = 0, wisdom = 0, courage = 0, compassion = 0, humility = 0 } = stat;
+    const total = virtue + wisdom + courage + compassion + humility;
 
-    function pickEnding(s) {
-        const {virtue, wisdom, courage, compassion, humility} = s.stats;
+    if (total < 5) return 'Failure';
+    if (compassion + humility >= Math.max(virtue, wisdom, courage)) return 'Merciful';
+    if (virtue + courage >= Math.max(compassion, wisdom, humility)) return 'Judicial';
+    return 'Success';
+  }
 
-        const total = virtue + wisdom + courage + compassion + humility;
-
-        if (total < 5) return 'bad_ending'
-
-        if (compassion + humility >= Math.max(virtue, wisdom, courage))  return 'mercy_ending'
-
-        if (virtue + courage >= Math.max(compassion, wisdom, humility)) return 'justice_ending'
-
-        return 'good_ending '
-    }
-
-    window.GameState = { State, initGame, assign, useConsult, usePity, isOver, pickEnding };
+  window.GameState = { State, initiateGame, assign, useConsult, usePity, isOver, pickEnding };
 })();
